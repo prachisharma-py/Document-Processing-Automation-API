@@ -7,9 +7,12 @@ from .serializers import DocumentUploadSerializer
 # Create your views here.
 
 
-class DocumentUploadedView(generics.CreateAPIView):
+class DocumentListCreateView(generics.ListCreateAPIView):
     serializer_class = DocumentUploadSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Document.objects.filter(use=self.request.user)
+        return Document.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save()

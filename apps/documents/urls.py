@@ -1,8 +1,8 @@
 from django.urls import path
 
-from .views import DocumentUploadedView
+from .views import DocumentListCreateView
 
 
 urlpatterns = [
-    path("upload/", DocumentUploadedView.as_view(), name="document-upload"),
+    path("", DocumentListCreateView.as_view(), name="document-list-create"),
 ]
