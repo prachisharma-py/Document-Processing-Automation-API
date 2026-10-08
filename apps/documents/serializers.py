@@ -32,6 +32,13 @@ class DocumentUploadSerializer(serializers.ModelSerializer):
                 "Only PDF files are allowed."
             )
 
+        max_size = 10 * 1024 * 1024     
+
+        if uploaded_file.size > max_size:
+            raise serializers.ValidationError(
+                "Fiile size must not exceed 10 MB."
+            )
+
         return uploaded_file
     
 
