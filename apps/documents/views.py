@@ -24,3 +24,17 @@ class DocumentDetailView(generics.RetrieveAPIView):
 
     def get_queryset(self):
         return Document.objects.filter(user=self.request.user)
+
+
+class DocumentDeleteView(generics.DestroyAPIView):
+    serializer_class = DocumentUploadSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Document.objects.filter(user=self.request.user)
+
+    def perform_destroy(self, instance):
+        if instance.file:
+            instance.file.delete(save=False)
+
+        instance.delete()
