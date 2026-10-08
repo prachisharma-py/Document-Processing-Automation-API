@@ -26,6 +26,15 @@ class DocumentUploadSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
 
+    def validate_file(self, uploaded_file):
+        if not uploaded_file.name.lower().endswith(".pdf"):
+            raise serializers.ValidationError(
+                "Only PDF files are allowed."
+            )
+
+        return uploaded_file
+    
+
     def create(self, validated_data):
         uploaded_file = validated_data["file"]
 
