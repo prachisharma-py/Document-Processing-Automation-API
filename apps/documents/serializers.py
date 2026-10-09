@@ -36,7 +36,7 @@ class DocumentUploadSerializer(serializers.ModelSerializer):
 
         if uploaded_file.size > max_size:
             raise serializers.ValidationError(
-                "Fiile size must not exceed 10 MB."
+                "File size must not exceed 10 MB."
             )
 
         return uploaded_file
@@ -55,4 +55,4 @@ class DocumentUploadSerializer(serializers.ModelSerializer):
         validated_data["user"] = self.context["request"].user
 
         return super().create(validated_data)
-        
+      
