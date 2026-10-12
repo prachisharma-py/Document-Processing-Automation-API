@@ -38,6 +38,14 @@ class Document(models.Model):
         choices=Status.choices,
         default=Status.UPLOADED,
     )
+    extracted_text = models.TextField(
+        blank=True,
+        default="",
+    )
+    processing_error = models.TextField(
+        blank=True,
+        default="",
+    )
     created_at = models.DateTimeField(
         auto_now_add=True
     )
