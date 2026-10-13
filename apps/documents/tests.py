@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework import status
 from rest_framework.test import APITestCase
+from unittest.mock import patch
 
 from .models import Document
 
@@ -82,3 +83,26 @@ class DocumentValidationTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Document.objects.count(), 0)
         self.assertEqual("File size must not exceed 10 MB.", str(response.data["file"][0]))
+
+    @patch("apps.documents.views.process_document.delay")
+    def test_upload_triggers_background_processing(self, mock_process):
+        pdf = self.create_pdf()
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.post(
+                self.url,
+                {
+                    "title": "Automatic Processing Test",
+                    "file": pdf,
+                },
+                format="multipart",
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        document = Document.objects.get(
+            title="Automatic Processing Test"
+        )
+
+        self.assertEqual(document.status, Document.Status.PENDING)
+        mock_process.assert_called_once_with(document.id)
