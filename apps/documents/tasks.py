@@ -9,8 +9,12 @@ def test_celery_task():
     return "Celery is working!"
 
 
-@shared_task
-def process_document(document_id):
+@shared_task(
+        bind=True,
+        max_retries=3,
+        default_retry_delay=10,
+)
+def process_document(self, document_id):
     document = Document.objects.get(id=document_id)
 
     document.status = Document.Status.PROCESSING
@@ -40,13 +44,17 @@ def process_document(document_id):
         }
 
     except Exception as exc:
-        document.status = Document.Status.FAILED
         document.processing_error = str(exc)
+
         document.save(
-            update_fields=[
-                "status",
-                "processing_error",
-                "updated_at",
-            ]
+        update_fields=["processing_error", "updated_at"]
         )
-        raise
+
+        if self.request.retries >= self.max_retries:
+            document.status = Document.Status.FAILED
+            document.save(
+                update_fields=["status", "updated_at"]
+            )
+            raise
+
+        raise self.retry(exc=exc)

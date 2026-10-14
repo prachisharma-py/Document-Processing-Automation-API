@@ -8,6 +8,8 @@ from django.test import TestCase, override_settings
 from apps.documents.models import Document
 from apps.documents.tasks import process_document
 
+from celery.exceptions import Retry
+
 
 User = get_user_model()
 
@@ -64,20 +66,27 @@ class DocumentProcessingTasksTests(TestCase):
 
     @patch(
         "apps.documents.tasks.extract_text_from_pdf",
-        side_effect=RuntimeError("PDF processing failed"),
+        side_effect=RuntimeError("Temporary PDF processing error"),
     )
-    def test_process_document_failure(self, mock_extract):
-        with self.assertRaisesRegex(
-            RuntimeError,
-            "PDF processing failed",
-        ):
+    @patch(
+        "apps.documents.tasks.process_document.retry",
+        side_effect=Retry("Retrying PDF processing"),
+    )
+    def test_process_document_retries_on_failure(
+        self, mock_retry, mock_extract
+    ):
+        with self.assertRaises(Retry):
             process_document(self.document.id)
 
         self.document.refresh_from_db()
 
-        self.assertEqual(self.document.status, Document.Status.FAILED)
+        self.assertEqual(
+            self.document.status,
+            Document.Status.PROCESSING,
+        )
         self.assertEqual(
             self.document.processing_error,
-            "PDF processing failed",
+            "Temporary PDF processing error",
         )
-        mock_extract.assert_called_once()
+        mock_extract.assert_called_once_with(self.document.file.path)
+        mock_retry.assert_called_once()
