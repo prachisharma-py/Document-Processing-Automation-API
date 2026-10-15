@@ -76,7 +76,7 @@ class DocumentProcessingTasksTests(TestCase):
         self, mock_retry, mock_extract
     ):
         with self.assertRaises(Retry):
-            process_document(self.document.id)
+            process_document.run(self.document.id)
 
         self.document.refresh_from_db()
 
@@ -90,3 +90,34 @@ class DocumentProcessingTasksTests(TestCase):
         )
         mock_extract.assert_called_once_with(self.document.file.path)
         mock_retry.assert_called_once()
+
+    @patch(
+        "apps.documents.tasks.extract_text_from_pdf",
+        side_effect=RuntimeError("PDF processing failed"),
+    )
+    def test_process_document_marks_failed_after_retries_exhausted(
+        self, mock_extract
+    ):
+        request_context = type(
+            "Request",
+            (),
+            {"retries": process_document.max_retries},
+        )()
+
+        process_document.request_stack.push(request_context)
+        try:
+            with self.assertRaises(RuntimeError):
+                process_document.run(self.document.id)
+        finally:
+            process_document.request_stack.pop()
+
+        self.document.refresh_from_db()
+
+        self.assertEqual(
+            self.document.status,
+            Document.Status.FAILED,
+        )
+        self.assertEqual(
+            self.document.processing_error,
+            "PDF processing failed",
+        )
