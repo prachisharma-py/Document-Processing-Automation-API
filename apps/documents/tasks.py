@@ -43,6 +43,14 @@ def process_document(self, document_id):
             "extracted_text_length": len(extracted_text),
         }
 
+    except FileNotFoundError as exc:
+        document.status = Document.Status.FAILED
+        document.processing_error = str(exc)
+        document.save(
+            update_fields=["status", "processing_error", "updated_at"]
+        )
+        raise
+
     except Exception as exc:
         document.processing_error = str(exc)
 

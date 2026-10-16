@@ -91,6 +91,7 @@ class DocumentProcessingTasksTests(TestCase):
         mock_extract.assert_called_once_with(self.document.file.path)
         mock_retry.assert_called_once()
 
+
     @patch(
         "apps.documents.tasks.extract_text_from_pdf",
         side_effect=RuntimeError("PDF processing failed"),
@@ -121,3 +122,32 @@ class DocumentProcessingTasksTests(TestCase):
             self.document.processing_error,
             "PDF processing failed",
         )
+
+
+    @patch(
+        "apps.documents.tasks.extract_text_from_pdf",
+        side_effect=FileNotFoundError("PDF file not found: test.pdf"),
+    )
+    @patch(
+        "apps.documents.tasks.process_document.retry"
+    )
+    def test_process_document_marks_failed_when_file_is_missing(
+        self, mock_retry, mock_extract
+    ):
+        with self.assertRaises(FileNotFoundError):
+            process_document.run(self.document.id)
+
+        self.document.refresh_from_db()
+
+        self.assertEqual(
+            self.document.status,
+            Document.Status.FAILED,
+        )
+
+        self.assertEqual(
+            self.document.processing_error,
+            "PDF file not found: test.pdf",
+        )
+
+        mock_extract.assert_called_once_with(self.document.file.path)
+        mock_retry.assert_not_called()
