@@ -23,3 +23,11 @@ def test_extract_text_fron_pdf_raises_error_when_file_missing(tmp_path):
 
     with pytest.raises(FileNotFoundError, match="missing_document.pdf"):
         extract_text_from_pdf(str(missing_pdf_path))
+
+
+def test_extract_text_from_pdf_raises_error_for_invalid_pdf(tmp_path):
+    invalid_pdf_path = tmp_path / "invalid_document.pdf"
+    invalid_pdf_path.write_bytes(b"This is not a valid PDF file.")
+
+    with pytest.raises(pymupdf.FileDataError):
+        extract_text_from_pdf(str(invalid_pdf_path))
