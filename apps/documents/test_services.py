@@ -31,3 +31,15 @@ def test_extract_text_from_pdf_raises_error_for_invalid_pdf(tmp_path):
 
     with pytest.raises(pymupdf.FileDataError):
         extract_text_from_pdf(str(invalid_pdf_path))
+
+
+def test_extract_text_from_pdf_returns_emptty_string_when_no_text(tmp_path):
+    pdf_path = tmp_path / "empty_text.pdf"
+
+    with pymupdf.open() as pdf:
+        pdf.new_page()
+        pdf.save(str(pdf_path))
+
+    extracted_text = extract_text_from_pdf(str(pdf_path))
+
+    assert extracted_text == ""
