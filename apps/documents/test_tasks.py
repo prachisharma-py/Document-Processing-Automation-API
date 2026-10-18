@@ -151,3 +151,12 @@ class DocumentProcessingTasksTests(TestCase):
 
         mock_extract.assert_called_once_with(self.document.file.path)
         mock_retry.assert_not_called()
+
+
+    def test_process_document_handles_deleted_document(self):
+        document_id = self.document.id
+        self.document.delete()
+
+        result = process_document.run(document_id)
+
+        self.assertIsNone(result)

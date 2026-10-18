@@ -15,7 +15,10 @@ def test_celery_task():
         default_retry_delay=10,
 )
 def process_document(self, document_id):
-    document = Document.objects.get(id=document_id)
+    try:
+        document = Document.objects.get(id=document_id)
+    except Document.DoesNotExist:
+        return None
 
     document.status = Document.Status.PROCESSING
     document.processing_error = ""
