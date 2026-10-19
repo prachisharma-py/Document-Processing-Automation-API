@@ -160,3 +160,25 @@ class DocumentProcessingTasksTests(TestCase):
         result = process_document.run(document_id)
 
         self.assertIsNone(result)
+
+
+    @patch(
+        "apps.documents.tasks.extract_text_from_pdf",
+        return_value="Extracted PDF text",
+    )
+    def test_process_document_can_run_twice(self, mock_extract):
+        first_result = process_document.run(self.document.id)
+        second_result = process_document.run(self.document.id)
+
+        self.document.refresh_from_db()
+
+        self.assertEqual(
+            self.document.status,
+            Document.Status.COMPLETED,
+        )
+        self.assertEqual(
+            self.document.extracted_text,
+            "Extracted PDF text",
+        )
+        self.assertEqual(first_result, second_result)
+        self.assertEqual(mock_extract.call_count, 2)
