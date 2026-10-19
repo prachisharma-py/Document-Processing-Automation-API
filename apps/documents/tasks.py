@@ -20,6 +20,9 @@ def process_document(self, document_id):
     except Document.DoesNotExist:
         return None
 
+    if document.status == Document.Status.COMPLETED:
+        return None
+
     document.status = Document.Status.PROCESSING
     document.processing_error = ""
     document.save(update_fields=["status", "processing_error", "updated_at"])

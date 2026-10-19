@@ -46,7 +46,6 @@ class DocumentProcessingTasksTests(TestCase):
     @patch(
         "apps.documents.tasks.extract_text_from_pdf",
         return_value="Extracted PDF text",
-
     )
     def test_process_document_success(self, mock_extract):
         result = process_document(self.document.id)
@@ -180,5 +179,31 @@ class DocumentProcessingTasksTests(TestCase):
             self.document.extracted_text,
             "Extracted PDF text",
         )
-        self.assertEqual(first_result, second_result)
-        self.assertEqual(mock_extract.call_count, 2)
+        self.assertIsNotNone(first_result)
+        self.assertIsNone(second_result)
+        self.assertEqual(mock_extract.call_count, 1)
+
+
+    @patch(
+        "apps.documents.tasks.extract_text_from_pdf"
+    )
+    def test_process_document_skips_completed_document(
+        self, mock_extract
+    ):
+        self.document.status = Document.Status.COMPLETED
+        self.document.extracted_text = "Previously extracted text"
+        self.document.save(
+            update_fields=["status", "extracted_text", "updated_at"]
+        )
+        result = process_document.run(self.document.id)
+        self.document.refresh_from_db()
+        self.assertIsNone(result)
+        self.assertEqual(
+            self.document.status, 
+            Document.Status.COMPLETED
+        )
+        self.assertEqual(
+            self.document.extracted_text,
+            "Previously extracted text",
+        )
+        mock_extract.assert_not_called()
