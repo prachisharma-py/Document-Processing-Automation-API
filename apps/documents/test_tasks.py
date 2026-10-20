@@ -81,7 +81,7 @@ class DocumentProcessingTasksTests(TestCase):
 
         self.assertEqual(
             self.document.status,
-            Document.Status.PROCESSING,
+            Document.Status.PENDING,
         )
         self.assertEqual(
             self.document.processing_error,
@@ -185,7 +185,8 @@ class DocumentProcessingTasksTests(TestCase):
 
 
     @patch(
-        "apps.documents.tasks.extract_text_from_pdf"
+        "apps.documents.tasks.extract_text_from_pdf",
+        return_value="Extracted PDF text",
     )
     def test_process_document_skips_completed_document(
         self, mock_extract
@@ -205,5 +206,27 @@ class DocumentProcessingTasksTests(TestCase):
         self.assertEqual(
             self.document.extracted_text,
             "Previously extracted text",
+        )
+        mock_extract.assert_not_called()
+
+
+    @patch(
+        "apps.documents.tasks.extract_text_from_pdf",
+        return_value="Extracted PDF text",
+    )
+    def test_process_document_skips_document_already_processing(
+        self, mock_extract
+    ):
+        self.document.status = Document.Status.PROCESSING
+        self.document.save(
+            update_fields=["status", "updated_at"]
+        )
+
+        result = process_document.run(self.document.id)
+        self.document.refresh_from_db()
+        self.assertIsNone(result)
+        self.assertEqual(
+            self.document.status,
+            Document.Status.PROCESSING,
         )
         mock_extract.assert_not_called()
