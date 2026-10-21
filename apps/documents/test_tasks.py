@@ -230,3 +230,33 @@ class DocumentProcessingTasksTests(TestCase):
             Document.Status.PROCESSING,
         )
         mock_extract.assert_not_called()
+
+
+    @patch(
+        "apps.documents.tasks.extract_text_from_pdf",
+        side_effect=RuntimeError("PDF processing failed"),
+    )
+    def test_failed_processing_does_not_keep_stale_extracted_text(
+        self, mock_extract
+    ):
+        self.document.extracted_text = "Old extracted text"
+        self.document.save(update_fields=["extracted_text"])
+
+        request_context = type(
+            "Request",
+            (),
+            {"retries": process_document.max_retries},
+        )()
+
+        process_document.request_stack.push(request_context)
+        try:
+            with self.assertRaises(RuntimeError):
+                process_document.run(self.document.id)
+        finally:
+            process_document.request_stack.pop()
+
+        self.document.refresh_from_db()
+
+        self.assertEqual(self.document.status, Document.Status.FAILED)
+        self.assertEqual(self.document.extracted_text, "")
+        self.assertEqual(self.document.processing_error, "PDF processing failed")

@@ -31,9 +31,16 @@ def process_document(self, document_id):
             return None
 
         document.status = Document.Status.PROCESSING
+        document.extracted_text = ""
         document.processing_error = ""
+
         document.save(
-            update_fields=["status", "processing_error", "updated_at"]
+            update_fields=[
+                "status",
+                "extracted_text",
+                "processing_error",
+                "updated_at",
+            ]
         )
 
     try:
