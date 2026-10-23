@@ -260,3 +260,33 @@ class DocumentProcessingTasksTests(TestCase):
         self.assertEqual(self.document.status, Document.Status.FAILED)
         self.assertEqual(self.document.extracted_text, "")
         self.assertEqual(self.document.processing_error, "PDF processing failed")
+
+
+    @patch(
+        "apps.documents.tasks.extract_text_from_pdf",
+        return_value="Recovered PDF text",
+    )
+    def test_successful_processing_clears_previous_error(
+        self, mock_extract
+    ):
+        self.document.status = Document.Status.PENDING
+        self.document.processing_error = "Previous processing failure"
+        self.document.extracted_text = ""
+        self.document.save(
+            update_fields=[
+                "status",
+                "processing_error",
+                "extracted_text",
+                "updated_at",
+            ]
+        )
+
+        result = process_document.run(self.document.id)
+
+        self.document.refresh_from_db()
+
+        self.assertEqual(self.document.status, Document.Status.COMPLETED)
+        self.assertEqual(self.document.extracted_text, "Recovered PDF text")
+        self.assertEqual(self.document.processing_error, "")
+        self.assertEqual(result["status"], Document.Status.COMPLETED)
+        mock_extract.assert_called_once_with(self.document.file.path)
