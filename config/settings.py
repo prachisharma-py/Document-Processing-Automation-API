@@ -26,15 +26,34 @@ load_dotenv(BASE_DIR / ".env")
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-oia^ta*0+(t+1&rr&r$c7t9mwp11yz1a2#pi8blf#sx-g*bl+k'
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-local-dev-only")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() in {
+    "true", "1", "yes"
+}
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv(
+        "DJANGO_ALLOWED_HOSTS",
+        "localhost,127.0.0.1",
+    ).split(",")
+    if host.strip()
+]
 
 
-# Application definition
+if not DEBUG:
+    if SECRET_KEY == "django-insecure-local-dev-only":
+        raise ValueError(
+            "DJANGO_SECRET_KEY must be set to a secure value in production."
+        )
+
+    if not ALLOWED_HOSTS:
+        raise ValueError(
+            "DJANGO_ALLOWED_HOSTS must be configured in production."
+        )
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
