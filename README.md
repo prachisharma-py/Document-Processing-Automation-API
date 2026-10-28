@@ -1,4 +1,3 @@
-# Document-Processing-Automation-API
 # Document Processing Automation API
 
 A backend API built with Django REST Framework that allows authenticated users to upload PDF documents and process them asynchronously using Celery, Redis, and PyMuPDF.
