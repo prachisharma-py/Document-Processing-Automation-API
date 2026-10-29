@@ -1,6 +1,7 @@
 from django.db import transaction
 
 from rest_framework import generics
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 
 from .models import Document
@@ -13,6 +14,7 @@ from .tasks import process_document
 class DocumentListCreateView(generics.ListCreateAPIView):
     serializer_class = DocumentUploadSerializer
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
 
     def get_queryset(self):
         return Document.objects.filter(user=self.request.user)
