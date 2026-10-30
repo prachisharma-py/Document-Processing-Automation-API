@@ -39,23 +39,23 @@ The project demonstrates REST API development, JWT authentication, document vali
 
 ```text
 Client / API Consumer
-        |
-        v
+       |
+       v
 Django REST Framework API
-        |
-        +------ PostgreSQL
-        |       Users, documents, status
-        |
-        +------ Redis
-        |       Celery message broker
-        |
-        v
+       |
+       +------ PostgreSQL
+       |       Users, documents, status
+       |
+       +------ Redis
+       |       Celery message broker
+       |
+       v
 Celery Worker
-        |
-        v
+       |
+       v
 PyMuPDF
-        |
-        v
+       |
+       v
 Extract PDF text and update status
 ```
 
@@ -91,6 +91,31 @@ Authorization: Bearer <access_token>
 
 Users can access and manage only their own documents. PDF uploads are validated before processing, and document text extraction runs asynchronously through Celery.
 
+## Interactive API Documentation
+
+The API documentation is generated using `drf-spectacular` and the OpenAPI specification.
+
+When running the application locally with Docker, the documentation is available at:
+
+| Resource | URL | Purpose |
+|---|---|---|
+| Swagger UI | `http://localhost:8000/api/doc/` | Explore endpoints and execute API requests |
+| OpenAPI Schema | `http://localhost:8000/api/schema/` | View or retrieve the API specification |
+| ReDoc | `http://localhost:8000/api/redoc/` | Browse API documentation in ReDoc |
+
+### Using Swagger UI
+
+1. Start the application using Docker Compose.
+2. Open the Swagger UI URL in your browser.
+3. Expand an endpoint to inspect its request parameters, request body, and responses.
+4. Use **Try it out** to execute requests.
+5. Register a user or log in to obtain JWT tokens.
+6. Click **Authorize** and provide your access token using the format `Bearer <access_token>`.
+7. Test authenticated endpoints, including document uploads and document retrieval.
+
+For PDF uploads, select `multipart/form-data` and use the file picker to choose a PDF file.
+
+The API accepts PDF files up to 10 MB. Uploaded documents are processed asynchronously by the Celery worker.
 
 ## Document Processing Lifecycle
 
@@ -216,9 +241,25 @@ The core API, JWT authentication, PDF document management, asynchronous processi
 
 Production deployment and final documentation verification remain planned.
 
+## Production API
+
+**Production deployment is planned.** A public production API URL will be added after deployment and verification.
+
+Once deployed, the production endpoints will follow this structure:
+
+| Resource | Production URL |
+|---|---|
+| API base URL | `https://your-deployed-domain` |
+| Swagger UI | `https://your-deployed-domain/api/doc/` |
+| OpenAPI Schema | `https://your-deployed-domain/api/schema/` |
+| ReDoc | `https://your-deployed-domain/api/redoc/` |
+
+These are URL templates, not currently live endpoints. Replace `your-deployed-domain` with the actual deployment hostname after deployment.
+
+The production API and documentation URLs will be verified before being published as live links.
+
 ## Future Improvements
 
 - Deploy the API and worker to a hosting provider.
-- Add API schema documentation.
 - Add CI checks for the complete Dockerized workflow.
 - Improve monitoring and production observability.
