@@ -235,31 +235,41 @@ document_processing_automation_api/
 └── requirements.txt
 ```
 
-## Current Status
+## **Current Status**
 
-The core API, JWT authentication, PDF document management, asynchronous processing, Docker setup, and automated tests are implemented.
+The core API, JWT authentication, PDF document management, asynchronous processing logic, Docker setup, and automated tests are implemented.
 
-Production deployment and final documentation verification remain planned.
+The API is deployed on Render with a production PostgreSQL database and Redis configuration.
 
-## Production API
+The live API supports user registration, authentication, document uploads, document listing, retrieval, and deletion.
 
-**Production deployment is planned.** A public production API URL will be added after deployment and verification.
+Production background processing and shared cloud file storage are still being configured.
 
-Once deployed, the production endpoints will follow this structure:
+## **Live Production API**
 
-| Resource | Production URL |
+The API is deployed and accessible through Render.
+
+| Resource | URL |
 |---|---|
-| API base URL | `https://your-deployed-domain` |
-| Swagger UI | `https://your-deployed-domain/api/doc/` |
-| OpenAPI Schema | `https://your-deployed-domain/api/schema/` |
-| ReDoc | `https://your-deployed-domain/api/redoc/` |
+| API Base URL | https://document-processing-automation-api.onrender.com |
+| Swagger UI | https://document-processing-automation-api.onrender.com/api/doc/ |
+| OpenAPI Schema | https://document-processing-automation-api.onrender.com/api/schema/ |
+| ReDoc | https://document-processing-automation-api.onrender.com/api/redoc/ |
 
-These are URL templates, not currently live endpoints. Replace `your-deployed-domain` with the actual deployment hostname after deployment.
+### **Try the Live API**
 
-The production API and documentation URLs will be verified before being published as live links.
+1. Open the Swagger UI.
+2. Register a new user using the registration endpoint.
+3. Log in to obtain JWT access and refresh tokens.
+4. Click **Authorize** and enter your access token.
+5. Test the authenticated document endpoints.
 
-## Future Improvements
+**Note:** The Render free web service may take some time to respond after a period of inactivity. Background document processing and persistent cloud file storage are still being configured.
 
-- Deploy the API and worker to a hosting provider.
+## **Future Improvements**
+
+- Integrate AWS S3 for persistent document storage.
+- Deploy a dedicated Celery background worker.
+- Complete production document processing.
 - Add CI checks for the complete Dockerized workflow.
 - Improve monitoring and production observability.
