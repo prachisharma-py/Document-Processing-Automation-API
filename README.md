@@ -4,6 +4,12 @@ A backend API built with Django REST Framework that allows authenticated users t
 
 The project demonstrates REST API development, JWT authentication, document validation, background task processing, automated testing, and Docker-based development.
 
+---
+
+🔗 **Live Demo**
+
+🚀 **Live API:** [https://document-processing-automation-api.onrender.com/api/doc/](https://document-processing-automation-api.onrender.com/api/doc/)
+
 ## Features
 
 - **JWT Authentication** — user registration, login, token refresh, and authenticated user endpoints.
@@ -251,7 +257,6 @@ The API is deployed and accessible through Render.
 
 | Resource | URL |
 |---|---|
-| API Base URL | https://document-processing-automation-api.onrender.com |
 | Swagger UI | https://document-processing-automation-api.onrender.com/api/doc/ |
 | OpenAPI Schema | https://document-processing-automation-api.onrender.com/api/schema/ |
 | ReDoc | https://document-processing-automation-api.onrender.com/api/redoc/ |
