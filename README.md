@@ -8,7 +8,9 @@ The project demonstrates REST API development, JWT authentication, document vali
 
 🔗 **Live Demo**
 
-🚀 **Live API:** [https://document-processing-automation-api.onrender.com/api/doc/](https://document-processing-automation-api.onrender.com/api/doc/)
+🚀 **Live API:** https://document-processing-automation-api.onrender.com/api/doc/
+
+---
 
 ## Features
 
