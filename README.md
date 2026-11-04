@@ -280,3 +280,42 @@ The API is deployed and accessible through Render.
 - Complete production document processing.
 - Add CI checks for the complete Dockerized workflow.
 - Improve monitoring and production observability.
+
+## **Contributing**
+
+Contributions, suggestions, and improvements are welcome.
+
+To contribute:
+
+1. Fork the repository.
+2. Clone your fork:
+
+   ```bash
+   git clone https://github.com/<your-username>/document-processing-automation-api.git
+   ```
+
+3. Create a feature branch:
+
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+4. Install dependencies and configure your local environment using `.env.example`.
+5. Make your changes and add appropriate tests.
+6. Run the automated test suite:
+
+   ```bash
+   docker compose exec web pytest
+   ```
+
+7. Commit and push your changes:
+
+   ```bash
+   git add .
+   git commit -m "Describe your changes"
+   git push origin feature/your-feature-name
+   ```
+
+8. Open a Pull Request describing your changes.
+
+Please ensure that tests pass and that no credentials, secret keys, or environment-specific configuration files are committed.
