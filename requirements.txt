@@ -1,6 +1,8 @@
 amqp==5.4.0
 asgiref==3.12.1
 billiard==4.3.0
+boto3==1.43.124
+botocore==1.43.124
 celery==5.6.3
 click==8.5.0
 click-didyoumean==0.3.1
@@ -9,8 +11,10 @@ click-repl==0.4.0
 Django==5.2.17
 djangorestframework==3.18.1
 djangorestframework_simplejwt==5.5.1
+django-storages==1.14.6
 drf-spectacular==0.30.0
 gunicorn==26.2.0
+jmespath==1.1.0
 kombu==5.6.2
 packaging==26.3
 prompt_toolkit==3.0.53
@@ -23,6 +27,7 @@ PyMuPDF==1.28.2
 redis==8.1.0
 six==1.17.0
 sqlparse==0.6.0
+s3transfer==0.19.3
 typing_extensions==4.16.0
 tzdata==2026.4
 tzlocal==5.4.4
