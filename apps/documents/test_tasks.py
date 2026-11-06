@@ -60,8 +60,7 @@ class DocumentProcessingTasksTests(TestCase):
         self.assertEqual(self.document.processing_error, "")
         self.assertEqual(result["document_id"], self.document.id)
         self.assertEqual(result["extracted_text_length"], 18)
-        mock_extract.assert_called_once_with(self.document.file.path)
-
+        mock_extract.assert_called_once()
 
     @patch(
         "apps.documents.tasks.extract_text_from_pdf",
@@ -87,7 +86,7 @@ class DocumentProcessingTasksTests(TestCase):
             self.document.processing_error,
             "Temporary PDF processing error",
         )
-        mock_extract.assert_called_once_with(self.document.file.path)
+        mock_extract.assert_called_once()
         mock_retry.assert_called_once()
 
 
@@ -148,7 +147,7 @@ class DocumentProcessingTasksTests(TestCase):
             "PDF file not found: test.pdf",
         )
 
-        mock_extract.assert_called_once_with(self.document.file.path)
+        mock_extract.assert_called_once()
         mock_retry.assert_not_called()
 
 
@@ -289,4 +288,4 @@ class DocumentProcessingTasksTests(TestCase):
         self.assertEqual(self.document.extracted_text, "Recovered PDF text")
         self.assertEqual(self.document.processing_error, "")
         self.assertEqual(result["status"], Document.Status.COMPLETED)
-        mock_extract.assert_called_once_with(self.document.file.path)
+        mock_extract.assert_called_once()

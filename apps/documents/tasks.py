@@ -44,7 +44,8 @@ def process_document(self, document_id):
         )
 
     try:
-        extracted_text = extract_text_from_pdf(document.file.path)
+        with document.file.open("rb") as pdf_file:
+            extracted_text = extract_text_from_pdf(pdf_file)
 
         document.extracted_text = extracted_text
         document.status = Document.Status.COMPLETED
