@@ -13,6 +13,7 @@ class DocumentUploadSerializer(serializers.ModelSerializer):
             "file_type",
             "file_size",
             "status",
+            "extracted_text",
             "created_at",
             "updated_at",
         ]
@@ -22,6 +23,7 @@ class DocumentUploadSerializer(serializers.ModelSerializer):
             "file_type",
             "file_size",
             "status",
+            "extracted_text",
             "created_at",
             "updated_at",
         ]
