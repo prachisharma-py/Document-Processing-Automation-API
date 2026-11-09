@@ -13,7 +13,6 @@ class DocumentUploadSerializer(serializers.ModelSerializer):
             "file_type",
             "file_size",
             "status",
-            "extracted_text",
             "created_at",
             "updated_at",
         ]
@@ -23,7 +22,6 @@ class DocumentUploadSerializer(serializers.ModelSerializer):
             "file_type",
             "file_size",
             "status",
-            "extracted_text",
             "created_at",
             "updated_at",
         ]
@@ -57,4 +55,15 @@ class DocumentUploadSerializer(serializers.ModelSerializer):
         validated_data["user"] = self.context["request"].user
 
         return super().create(validated_data)
-      
+
+
+class DocumentTextSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Document
+        fields = [
+            "id",
+            "status",
+            "extracted_text",
+        ]
+        read_only_fields = fields
+

@@ -64,7 +64,7 @@ class DocumentValidationTests(APITestCase):
             format="multipart",
         )
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST),
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Document.objects.count(), 0)
         self.assertEqual("Only PDF files are allowed.", str(response.data["file"][0]))
 
@@ -106,3 +106,63 @@ class DocumentValidationTests(APITestCase):
 
         self.assertEqual(document.status, Document.Status.PENDING)
         mock_process.assert_called_once_with(document.id)
+
+
+class DocumentTextViewTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="testpassword123",
+        )
+        self.client.force_authenticate(user=self.user)
+        self.document = Document.objects.create(
+            user=self.user,
+            title="Test Document",
+            file="documents/test.pdf",
+            original_filename="test.pdf",
+            file_type="pdf",
+            file_size=1024,
+            status=Document.Status.COMPLETED,
+            extracted_text="This is the extracted PDF text.",
+        )
+        self.url = f"/api/v1/documents/{self.document.id}/text/"
+
+
+    def test_completed_document_returns_extracted_text(self):
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.data["extracted_text"],
+            "This is the extracted PDF text.",
+        )
+
+
+    def test_pending_document_returns_conflict(self):
+        self.document.status = Document.Status.PENDING
+        self.document.save(update_fields=["status"])
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+        self.assertEqual(response.data["status"], Document.Status.PENDING)
+
+
+    def test_processing_document_returns_conflict(self):
+        self.document.status = Document.Status.PROCESSING
+        self.document.save(update_fields=["status"])
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+        self.assertEqual(response.data["status"], Document.Status.PROCESSING)
+
+
+    def test_failed_document_returns_conflict(self):
+        self.document.status = Document.Status.FAILED
+        self.document.save(update_fields=["status"])
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+        self.assertEqual(response.data["detail"], "Document processing failed.")
