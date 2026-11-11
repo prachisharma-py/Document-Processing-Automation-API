@@ -20,6 +20,7 @@ The project demonstrates REST API development, JWT authentication, document vali
 - **User Data Isolation** — users can access and manage only their own documents.
 - **Asynchronous Processing** — process documents in the background using Celery and Redis.
 - **PDF Text Extraction** — extract text from PDF files using PyMuPDF.
+- **Extracted Text Retrieval** — retrieve extracted PDF text through a dedicated endpoint without including large text payloads in regular document responses.
 - **Processing Status Tracking** — track documents through uploaded, pending, processing, completed, and failed states.
 - **Task Reliability** — retry failed processing tasks and prevent duplicate processing.
 - **Automated Tests** — test authentication, document management, validation, and processing behavior.
@@ -52,10 +53,13 @@ Client / API Consumer
 Django REST Framework API
        |
        +------ PostgreSQL
-       |       Users, documents, status
+       |       Users, document metadata, processing status
+       |
+       +------ AWS S3
+       |       Private PDF document storage
        |
        +------ Redis
-       |       Celery message broker
+       |       Celery message broker and result backend
        |
        v
 Celery Worker
@@ -67,7 +71,9 @@ PyMuPDF
 Extract PDF text and update status
 ```
 
-The API accepts document uploads and schedules background processing. The Celery worker extracts text from each PDF and updates its processing status in the database.
+The API stores document metadata in PostgreSQL and PDF files in the configured storage backend. Local development uses Django filesystem storage, while production uses a private AWS S3 bucket.
+
+After an upload, the API schedules asynchronous processing through Celery and Redis. The Celery worker retrieves the PDF, extracts its text using PyMuPDF, and updates the document's processing status and extracted text in PostgreSQL.
 
 ## API Endpoints
 
@@ -89,6 +95,7 @@ All endpoints use the `/api/v1/` prefix.
 | POST | `/api/v1/documents/` | Upload a PDF document |
 | GET | `/api/v1/documents/` | List the authenticated user's documents |
 | GET | `/api/v1/documents/<id>/` | Retrieve a document |
+| GET | `/api/v1/documents/<id>/text/` | Retrieve extracted text after successful processing |
 | DELETE | `/api/v1/documents/<id>/delete/` | Delete a document and its stored file |
 
 **Authentication:** Document endpoints require a valid JWT access token. Include it in the request header:
@@ -223,8 +230,10 @@ The `.env.example` file documents the environment variables required by the appl
 - PostgreSQL database name, username, password, host, and port.
 - Redis connection URL.
 - Celery broker and result backend URLs.
+- AWS S3 bucket name and region for production document storage.
+- AWS credentials supplied securely through the deployment environment or an IAM role.
 
-Use development settings locally and configure secure secrets, allowed hosts, and HTTPS-related settings before production deployment.
+For local development, leave `AWS_STORAGE_BUCKET_NAME` unset to use filesystem storage. For production, configure the AWS S3 bucket and region, along with appropriate AWS credentials or IAM permissions. Never commit real credentials or secret keys.
 
 ## Project Structure
 
@@ -245,13 +254,20 @@ document_processing_automation_api/
 
 ## **Current Status**
 
-The core API, JWT authentication, PDF document management, asynchronous processing logic, Docker setup, and automated tests are implemented.
+The core API and production deployment are implemented.
 
-The API is deployed on Render with a production PostgreSQL database and Redis configuration.
+- JWT authentication and user-specific document access.
+- PDF upload, validation, listing, retrieval, and deletion.
+- Private AWS S3 storage for production documents.
+- Asynchronous PDF processing using Celery and Redis.
+- PDF text extraction using PyMuPDF.
+- Document processing status tracking, retries, and duplicate-processing protection.
+- Dedicated endpoint for retrieving extracted text.
+- Docker-based local development environment.
+- Automated test suite.
+- Production deployment on Render with PostgreSQL, Redis, Gunicorn, and Supervisor.
 
-The live API supports user registration, authentication, document uploads, document listing, retrieval, and deletion.
-
-Production background processing and shared cloud file storage are still being configured.
+The production API supports the complete document-processing workflow, from PDF upload to extracted-text retrieval.
 
 ## **Live Production API**
 
@@ -271,15 +287,15 @@ The API is deployed and accessible through Render.
 4. Click **Authorize** and enter your access token.
 5. Test the authenticated document endpoints.
 
-**Note:** The Render free web service may take some time to respond after a period of inactivity. Background document processing and persistent cloud file storage are still being configured.
+**Note:** The Render free web service may take some time to respond after a period of inactivity. Background processing runs alongside the web application, so queued tasks may be delayed while the service is inactive.
 
 ## **Future Improvements**
 
-- Integrate AWS S3 for persistent document storage.
-- Deploy a dedicated Celery background worker.
-- Complete production document processing.
-- Add CI checks for the complete Dockerized workflow.
-- Improve monitoring and production observability.
+- Add CI/CD automation for testing and deployment.
+- Improve application monitoring and production observability.
+- Add document processing metrics and performance monitoring.
+- Add support for additional document formats.
+- Improve API rate limiting and abuse protection.
 
 ## **Contributing**
 
