@@ -23,9 +23,10 @@ The project demonstrates REST API development, JWT authentication, document vali
 - **Task Reliability** — retry failed processing tasks and prevent duplicate processing.
 - **Private Cloud Storage** — store production PDF documents in AWS S3.
 - **Automated Tests** — test authentication, document management, validation, and processing behavior.
-- **Code Coverage** — 93% overall coverage across the application and configuration.
+- **Code Coverage** — 94% overall coverage across the application and configuration.
 - **Docker Support** — run the API, PostgreSQL, Redis, and Celery worker using Docker Compose.
 - **Production Configuration** — Gunicorn, WhiteNoise, Supervisor, environment-based settings, and security configuration.
+- **Structured JSON Logging** — capture document-processing events, errors, retries, and contextual metadata for production troubleshooting.
 
 ## Tech Stack
 
@@ -47,6 +48,7 @@ The project demonstrates REST API development, JWT authentication, document vali
 | pytest | Automated testing |
 | pytest-django | Django test integration |
 | pytest-cov | Code coverage reporting |
+| python-json-logger | Structured JSON logging |
 | drf-spectacular | OpenAPI documentation |
 
 ## Architecture
@@ -253,7 +255,7 @@ python manage.py check
 
 <text>27 automated tests passed</text>
 
-<text>93% overall code coverage</text>
+<text>94% overall code coverage</text>
 
 The test suite covers authentication, document management, upload validation, and asynchronous document-processing behavior.
 
@@ -308,6 +310,7 @@ The production setup uses:
 - Supervisor to manage the web and Celery worker processes.
 - Environment variables for production configuration.
 - AWS S3 for private PDF storage.
+- Structured JSON logging for document-processing events, errors, retries, and operational troubleshooting.
 
 ### Live Production Resources
 
@@ -341,13 +344,13 @@ The core API and production deployment are implemented.
 - Docker-based local development environment.
 - Automated test suite with 93% overall coverage.
 - Production deployment on Render with PostgreSQL, Redis, Gunicorn, and Supervisor.
+- GitHub Actions CI workflow for automated checks and test execution.
+- Structured JSON logging for production document-processing events and errors.
 
 The production API supports the complete document-processing workflow, from PDF upload to extracted-text retrieval.
 
 ## Future Improvements
 
-- Add CI/CD automation for testing and deployment.
-- Improve application monitoring and production observability.
 - Add document processing metrics and performance monitoring.
 - Add support for additional document formats.
 - Improve API rate limiting and abuse protection.
