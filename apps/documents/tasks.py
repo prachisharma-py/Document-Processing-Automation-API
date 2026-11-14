@@ -1,8 +1,12 @@
+import logging
+
 from celery import shared_task
 from django.db import transaction
 
 from apps.documents.models import Document
 from apps.documents.services import extract_text_from_pdf
+
+logger = logging.getLogger(__name__)
 
 
 @shared_task
@@ -30,6 +34,11 @@ def process_document(self, document_id):
         }:
             return None
 
+        logger.info(
+            "Document processing started",
+            extra={"document_id": document_id}
+        )
+
         document.status = Document.Status.PROCESSING
         document.extracted_text = ""
         document.processing_error = ""
@@ -53,6 +62,15 @@ def process_document(self, document_id):
         document.save(
             update_fields=["extracted_text", "status", "processing_error", "updated_at",]
         )
+
+        logger.info(
+            "Document processing completed",
+            extra={
+                "document_id": document_id,
+                "extracted_text_length": len(extracted_text),
+            },
+        )
+
         return {
             "document_id": document.id,
             "status": document.status,
@@ -60,6 +78,11 @@ def process_document(self, document_id):
         }
     
     except FileNotFoundError as exc:
+        logger.exception(
+            "Document file not found",
+            extra={"document_id": document_id},
+        )
+
         document.status = Document.Status.FAILED
         document.processing_error = str(exc)
         document.save(
@@ -68,13 +91,37 @@ def process_document(self, document_id):
         raise
 
     except Exception as exc:
+        logger.exception(
+            "Document processing failed",
+            extra={
+                "document_id": document_id,
+                "retry_count": self.request.retries,
+            },
+        )
+
         document.processing_error = str(exc)
         if self.request.retries >= self.max_retries:
+            logger.error(
+                "Document processing retries exhausted",
+                extra={
+                    "document_id": document_id,
+                    "retry_count": self.request.retries,
+                },
+            )
+
             document.status = Document.Status.FAILED
             document.save(
                 update_fields=["status", "processing_error", "updated_at"]
             )
             raise
+
+        logger.warning(
+            "Scheduling document processing retry",
+            extra={
+                "document_id": document_id,
+                "retry_count": self.request.retries + 1,
+            },
+        )
 
         document.status = Document.Status.PENDING
         document.save(

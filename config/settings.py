@@ -15,6 +15,7 @@ import os
 from dotenv import load_dotenv
 
 from datetime import timedelta
+from pythonjsonlogger.json import JsonFormatter
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -252,15 +253,15 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "verbose": {
-            "format": "{levelname} {asctime} {name} {message}",
-            "style": "{",
+        "json": {
+            "()": JsonFormatter,
+            "format": "%(levelname)s %(asctime)s %(name)s %(message)s",
         },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "formatter": "verbose",
+            "formatter": "json",
         },
     },
     "loggers": {
