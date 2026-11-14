@@ -10,6 +10,10 @@ The project demonstrates REST API development, JWT authentication, document vali
 - **OpenAPI Schema:** https://document-processing-automation-api.onrender.com/api/schema/
 - **ReDoc:** https://document-processing-automation-api.onrender.com/api/redoc/
 
+## Project Screenshot
+
+![Document Processing Automation API](assets/document-processing-api.png)
+
 ## Features
 
 - **JWT Authentication** — user registration, login, token refresh, and authenticated user endpoints.
